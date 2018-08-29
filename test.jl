@@ -6,9 +6,10 @@ include("problems.jl")
 
 
 function test()
-    data = readdlm("data/u120.csv", ',', Float64, '\n')
-    V = 150.0
+    data = readdlm("data/u120.csv", ',', Int, '\n')
+    V = 150
 
+    println("i\tf_i")
     for i = 1:size(data, 1)
         w = data[i,:]
 
