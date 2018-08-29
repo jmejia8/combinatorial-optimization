@@ -1,7 +1,7 @@
 include("structures.jl")
 include("operators.jl")
 
-function binpacking(V::Float64, w::Array{Float64})
+function binpacking(V::Real, w::Vector)
     
     # objective function
     f(w) = begin
@@ -14,7 +14,7 @@ function binpacking(V::Float64, w::Array{Float64})
         return B + length(w) - j
     end
 
-    S = Permutation(1:length(w), w, f(w))
+    S = Permutation(w, f(w))
 
     initSol() = S
 
@@ -26,14 +26,3 @@ function binpacking(V::Float64, w::Array{Float64})
     return fobj, initSol, getNeighbor, distance, max_iters
 
 end
-
-ftmp(w) = begin
-        B = 1; j = 1
-        for i = 1:length(w)
-            if sum( w[j:i]) >= V
-                println(w[j:i], sum(w[j:i]))
-                j = i; B += 1
-            end
-        end
-        B
-    end
