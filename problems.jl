@@ -10,7 +10,7 @@ function binpacking(V::Real, w::Vector)
                 j = i; B += 1
             end
         end
-        return B + length(w) - j
+        return B
     end
 
     S = Permutation(w, f(w))
