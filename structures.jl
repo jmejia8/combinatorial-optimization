@@ -1,5 +1,4 @@
 mutable struct Permutation
-    x::Array{Int32}
-    w::Array{Float64}
+    w::Array{Real}
     f::Int32
 end
