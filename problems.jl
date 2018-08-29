@@ -2,7 +2,6 @@ include("structures.jl")
 include("operators.jl")
 
 function binpacking(V::Real, w::Vector)
-    
     # objective function
     f(w) = begin
         B = 1; j = 1

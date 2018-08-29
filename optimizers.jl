@@ -11,6 +11,4 @@ function hillClimbing(fObj::Function, initSolution::Function, getNeighbor::Funct
     end
 
     return S_old.w, S_old.f
-
-
 end
