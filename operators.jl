@@ -1,6 +1,6 @@
 import Random.randperm
 
-function is_better(S1::Permutation, S2::Permutation)
+function is_better(S1, S2)
     # S1 is better than S2
     return S1.f < S2.f
 end
@@ -27,6 +27,19 @@ function getNeighbor(S::Permutation, f::Function; distance::Real = 2)
     neighbor.f = f(neighbor)
 
     return neighbor
+end
+
+function getNeighbor(bins::Array{Bin}, f::Function; distance::Real=2)
+    b = length(bins)
+
+    for i = 1:b
+        w = bins[i].w
+        for j = i+1:b
+            
+        end
+    end
+
+
 end
 
 initSolution(S::Permutation, f::Function) = getNeighbor(S, f; distance = Inf)
