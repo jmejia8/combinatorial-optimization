@@ -25,3 +25,7 @@ function binpacking(V::Real, w::Vector)
     return fobj, initSol, getNeighbor, distance, max_iters
 
 end
+
+function binpacking2(V::Real, w::Vector)
+    return b -> sum(b.w), 
+end

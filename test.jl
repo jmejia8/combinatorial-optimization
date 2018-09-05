@@ -1,7 +1,7 @@
 import DelimitedFiles.readdlm
 
-include("optimizers.jl")
 include("problems.jl")
+include("optimizers.jl")
 
 
 
@@ -20,4 +20,7 @@ function test()
     end
 end
 
-test()
+# test()
+
+a = firstFit(BinPacking([4, 8, 1, 4, 2, 1], 10))
+# println(a)
