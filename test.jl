@@ -22,9 +22,17 @@ function test()
 end
 
 function test_greedy()
-    W = readdlm("data/u120.csv", ',', '\n')
 
-    C = 150
+    id = :t
+
+    if id == :u
+        W = readdlm("data/u120.csv", ',', '\n')
+        C = 150
+    else
+        W = readdlm("data/t120.csv", ',', '\n')
+        C = 100
+    end
+
 
     heuristic_names = ["First Fit","Current Fit", "Fullest Fit","Emptiest Fit"]
     heuristics      = [firstFit,    currentFit,   fullestFit,    emptiestFit]
