@@ -27,5 +27,5 @@ function binpacking(V::Real, w::Vector)
 end
 
 function binpacking2(V::Real, w::Vector)
-    return b -> sum(b.w), 
+    return b -> sum(b.w)
 end
