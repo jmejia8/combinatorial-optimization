@@ -7,7 +7,7 @@ mutable struct Bin
     x::Array{Int}   # items
     w::Array{Real}  # whight
     C::Real         # capacity
-    f::Int32        # obj. func. value
+    f::Real        # obj. func. value
 end
 
 struct BinPacking
