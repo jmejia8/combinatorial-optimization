@@ -13,7 +13,43 @@ function hillClimbing(fObj::Function, initSolution::Function, getNeighbor::Funct
     return S_old.w, S_old.f
 end
 
-function firstFit(problem::BinPacking)
+function firstFit(problem::BinPacking; order_bins = :firstBin)
+    # order_bins = :firstBin
+    # order_bins = :fullestBin
+    # order_bins = :emptiestBin
+    bins = Array{Bin}([Bin([], [], problem.C, 0)])
+
+    x = randperm(length(problem.w))
+    w = problem.w[x]
+    C = problem.C
+
+    for j = 1:length(problem.w)
+        saved = false
+        for bin ∈ bins
+            if bin.f + w[j] < bin.C
+                push!(bin.w, w[j])
+                push!(bin.x, x[j])
+                bin.f += w[j]
+                saved = true
+                break
+            end
+
+        end
+        !saved && push!(bins, Bin(x[j:j], w[j:j], C, w[j]))
+
+        if order_bins == :fullestBin
+            sort(bins; lt = (a, b) -> a.f > b.f)
+        elseif order_bins == :emptiestBin
+            sort(bins; lt = (a, b) -> a.f < b.f)
+        end
+    end
+    
+    return bins
+
+end
+
+
+function currentFit(problem::BinPacking)
     bins = Array{Bin}([])
 
     x = randperm(length(problem.w))
@@ -34,3 +70,7 @@ function firstFit(problem::BinPacking)
     return bins
 
 end
+
+
+fullestFit(problem::BinPacking) = firstFit(problem; order_bins = :fullestBin)
+emptiestFit(problem::BinPacking) = firstFit(problem; order_bins = :emptiestBin)
