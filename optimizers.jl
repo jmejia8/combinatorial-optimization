@@ -19,8 +19,8 @@ function firstFit(problem::BinPacking; order_bins = :firstBin)
     # order_bins = :emptiestBin
     bins = Array{Bin}([Bin([], [], problem.C, 0)])
 
-    x = randperm(length(problem.w))
-    w = problem.w[x]
+    w = problem.w
+    x = 1:length(w)
     C = problem.C
 
     for j = 1:length(problem.w)
@@ -52,8 +52,8 @@ end
 function currentFit(problem::BinPacking)
     bins = Array{Bin}([])
 
-    x = randperm(length(problem.w))
-    w = problem.w[x]
+    w = problem.w
+    x = 1:length(w)
 
     i = 1
     for j = 1:length(problem.w)

@@ -42,9 +42,18 @@ function test_greedy()
         println("=============[  ", heuristic_names[i], "  ]=============")
  
         for i = 1:size(W, 1)
-            a = heuristic(BinPacking(W[i,:], C))
-            print(i, "\t")
-            summary(a)
+            # ordered asc
+            a = heuristic(BinPacking(sort(W[i,:]; lt = <), C))
+
+            # ordered desc
+            b = heuristic(BinPacking(sort(W[i,:]; lt = >), C))
+
+            # Random
+            w = W[i,:]
+            c = heuristic(BinPacking(w[randperm(length(w))], C))
+
+            @printf("%d asc = %d \t desc = %d \t rand = %d \n", i, length(a), length(b), length(c))
+
         end
 
         println("----------------------------------")
