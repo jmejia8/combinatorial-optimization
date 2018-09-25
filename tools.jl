@@ -17,7 +17,7 @@ function printbin(bins::Array{Bin})
     end
 end
 
-function summary(bins::Array{Bin})
+function summary_(bins::Array{Bin})
     Cs = [ bin.f for bin ∈ bins]
     @printf("|B| = %d \t mean(w) = %.3f \t std(w) = %.3f\n", length(bins), mean(Cs), std(Cs))
 end
