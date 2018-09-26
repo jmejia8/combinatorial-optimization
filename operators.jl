@@ -11,7 +11,7 @@ function is_better(B1::Array{Bin}, B2::Array{Bin})
     f2 = sum( [ b.f^2 for b in B2 ] )
     # println(f1)
     # println(f2)
-    return f1 > f2
+    return f1 >= f2
 end
 
 function swap(S::Permutation, I::Array{Int}, J::Array{Int})
@@ -62,22 +62,25 @@ function swap(bin1, bin2; distance::Real=2)
     end
 
     if ii > 0 && jj > 0
+        bin1.f += -bin1.w[ii] + bin2.w[jj]
+        bin2.f += bin1.w[ii] - bin2.w[jj]
+        
         w = bin1.w[ii]
         bin1.w[ii] = bin2.w[jj]
         bin2.w[jj] = w
-        bin1.f += bin1.w[ii] - bin2.w[jj]
-        bin2.f += -bin1.w[ii] + bin2.w[jj]
         return 2
     elseif ii > 0
-        push!(bin2.w, bin1.w[ii])
-        bin2.f += bin1.w[ii]
         bin1.f -= bin1.w[ii]
+        bin2.f += bin1.w[ii]
+
+        push!(bin2.w, bin1.w[ii])
         deleteat!(bin1.w, ii)
         return 1
     elseif jj > 0
-        push!(bin1.w, bin2.w[jj])
         bin1.f += bin2.w[jj]
         bin2.f -= bin2.w[jj]
+
+        push!(bin1.w, bin2.w[jj])
         deleteat!(bin2.w, jj)
         return 1
     end
@@ -94,28 +97,32 @@ function getNeighbor(Bins::Array{Bin}, f::Function; distance::Real=2)
 
     for i = 1:b
         bin1 = bins[Ids[i]]
-        for j = 1:b
-            if i == j
-                continue
-            end
+        for j = (i+1):b
             bin2 = bins[Ids[j]]
 
 
             d  += swap(bin1, bin2)
 
             if d >= distance
-                return bins
+                break
             end
 
         end
-    end
 
-    for i = 1:b
-        if bins[i].f <= 0
-            deleteat!(bins,i)
+        if d >= distance
+            break
         end
     end
 
+
+    rms = Int[]
+    for i = 1:b
+        if bins[i].f < 1
+            push!(rms, i)
+        end
+    end
+
+    deleteat!(bins, rms)
     return bins
 
 
