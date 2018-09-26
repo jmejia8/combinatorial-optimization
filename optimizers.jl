@@ -10,7 +10,7 @@ function hillClimbing(fObj::Function, initSolution::Function, getNeighbor::Funct
         end
     end
 
-    return S_old.w, S_old.f
+    return S_old
 end
 
 function firstFit(problem::BinPacking; order_bins = :firstBin)

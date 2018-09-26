@@ -5,6 +5,15 @@ function is_better(S1, S2)
     return S1.f < S2.f
 end
 
+function is_better(B1::Array{Bin}, B2::Array{Bin})
+    # B1 is better than B2
+    f1 = sum( [ b.f^2 for b in B1 ] )
+    f2 = sum( [ b.f^2 for b in B2 ] )
+    # println(f1)
+    # println(f2)
+    return f1 > f2
+end
+
 function swap(S::Permutation, I::Array{Int}, J::Array{Int})
 
     for i ∈ 1:length(I)
@@ -32,7 +41,7 @@ end
 function swap(bin1, bin2; distance::Real=2)
     ii = jj = -1
 
-    for i = 1:randperm(length(bin1.w))
+    for i = randperm(length(bin1.w))
         w = bin1.w[i]
 
         if w + bin2.f <= bin2.C
@@ -41,48 +50,77 @@ function swap(bin1, bin2; distance::Real=2)
         end
     end
     
-    for j = 1:randperm(length(bin2.w))
-        w = bin2.w[i]
+    wii = ii > 0 ? bin1.w[ii] : 0
 
-        if w + bin1.f - bin1.w[ii] <= bin1.C
+    for j = randperm(length(bin2.w))
+        w = bin2.w[j]
+
+        if w + bin1.f - wii <= bin1.C
             jj = j
             break
         end
     end
 
-    if ii > 0
+    if ii > 0 && jj > 0
         w = bin1.w[ii]
         bin1.w[ii] = bin2.w[jj]
         bin2.w[jj] = w
-    end
-    
-    if jj > 0
         bin1.f += bin1.w[ii] - bin2.w[jj]
         bin2.f += -bin1.w[ii] + bin2.w[jj]
+        return 2
+    elseif ii > 0
+        push!(bin2.w, bin1.w[ii])
+        bin2.f += bin1.w[ii]
+        bin1.f -= bin1.w[ii]
+        deleteat!(bin1.w, ii)
+        return 1
+    elseif jj > 0
+        push!(bin1.w, bin2.w[jj])
+        bin1.f += bin2.w[jj]
+        bin2.f -= bin2.w[jj]
+        deleteat!(bin2.w, jj)
+        return 1
     end
 
-    if jj < 0 && ii < 0
-        return 
-    end
+    return 0
 
 end
 
-function getNeighbor(bins::Array{Bin}, f::Function; distance::Real=2)
+function getNeighbor(Bins::Array{Bin}, f::Function; distance::Real=2)
+    bins = deepcopy(Bins)
     b = length(bins)
     Ids = randperm(b)
-    d = div(distance, 2)
+    d = 0
 
     for i = 1:b
         bin1 = bins[Ids[i]]
-        for j = i+1:b
+        for j = 1:b
+            if i == j
+                continue
+            end
             bin2 = bins[Ids[j]]
 
-            swap(bin1, bin2)
+
+            d  += swap(bin1, bin2)
+
+            if d >= distance
+                return bins
+            end
 
         end
     end
 
+    for i = 1:b
+        if bins[i].f <= 0
+            deleteat!(bins,i)
+        end
+    end
+
+    return bins
+
 
 end
+
+
 
 initSolution(S::Permutation, f::Function) = getNeighbor(S, f; distance = Inf)

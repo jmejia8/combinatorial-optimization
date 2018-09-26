@@ -63,4 +63,23 @@ function test_greedy()
 end
 
 # test()
-@time test_greedy()
+# @time test_greedy()
+
+# bins = firstFit(BinPacking(rand(10:20,10), 50))
+
+# @time bins2 = getNeighbor(bins, x->1; distance=5)
+
+# printbin(bins)
+# println("-----------------------------------")
+# printbin(bins2)
+bins1 = currentFit(BinPacking(rand(1:40,10), 50))
+initSolBins() = bins1
+
+bins2 = hillClimbing(x->1, initSolBins, getNeighbor; distance=20, max_iters=100)
+
+printbin(bins1)
+println("-----------------------------------")
+println("-----------------------------------")
+printbin(bins2)
+
+# cambiar a swaps (1, 0) (2, 2) ...
