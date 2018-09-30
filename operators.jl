@@ -38,7 +38,7 @@ function getNeighbor(S::Permutation, f::Function; distance::Real = 2)
     return neighbor
 end
 
-function swap(bin1, bin2; distance::Real=2)
+function swap(bin1::Bin, bin2::Bin; distance::Real=2)
     ii = jj = -1
 
     for i = randperm(length(bin1.w))

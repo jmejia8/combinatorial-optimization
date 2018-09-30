@@ -74,3 +74,36 @@ end
 
 fullestFit(problem::BinPacking) = firstFit(problem; order_bins = :fullestBin)
 emptiestFit(problem::BinPacking) = firstFit(problem; order_bins = :emptiestBin)
+
+function simulatedAnnealing(f::Function, initSolution::Function, getNeighbor::Function; distance::Int = 2, max_iters::Int = 1000)
+    T_min = 0.1
+    T0    = 100
+    T     = T0
+    max_attemps = 10
+
+    g(T, t) = T_min + T0*(1.0 - t / max_iters)
+    p(f_old, f_new, T) = exp( (f_new - f_old) / T ) # minimization problem
+
+
+    S_old = initSolution()
+    S_best = S_old
+
+    for t = 1:max_iters
+
+        for i = 1:max_attemps
+            S_new = getNeighbor(S_old, f; distance = distance)
+
+            if is_better(S_new, S_old) || rand() < p(S_old.f, S_new.f, T)
+                S_old = S_new
+
+                if is_better(S_new, S_best)
+                    S_best = S_new
+                end
+            end
+        end
+     
+        T = g(T, t) < T_min ? T_min : g(T, t)
+    end
+
+    return S_best
+end
