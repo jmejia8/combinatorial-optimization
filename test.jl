@@ -24,7 +24,7 @@ function test()
         fobj, initSol, getNeighbor, d, T = binpacking(C, w)
 
         result_hc = hillClimbing(fobj, initSol, getNeighbor; distance=2, max_iters=T)
-        result_sa = simulatedAnnealing(fobj, initSol, getNeighbor; distance=10, max_iters=T)
+        result_sa = simulatedAnnealing(fobj, initSol, getNeighbor; distance=2, max_iters=T)
         println(i, "\t", result_hc.f, "\t", result_sa.f)
 
     end
