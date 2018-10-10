@@ -107,3 +107,19 @@ function simulatedAnnealing(f::Function, initSolution::Function, getNeighbor::Fu
 
     return S_best
 end
+
+function tabuSearch(f::Function, initSolution::Function, getNeighbor::Function; distance::Int = 2, max_iters::Int = 1000)
+    S_old = initSolution()
+
+    tabuList = zeros(Int, length(S_old.w))
+
+    for t = 1:max_iters
+        S_new = getNeighbor(S_old, fObj, tabuList; distance = distance)
+
+        if is_better(S_new, S_old)
+            S_old = S_new
+        end
+    end
+
+    return S_old
+end
