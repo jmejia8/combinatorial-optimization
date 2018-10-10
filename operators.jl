@@ -55,21 +55,16 @@ function getNeighbor(S::Permutation, f::Function, tabuList; distance::Real = 2, 
     distance = min(distance, length(S.w))
     k = max(1, round(Int, distance / 2))
 
-    I = randperm(length(S.w))
+    neighbor = deepcopy(S)
 
-    neighbor = swap(Permutation(copy(S.w), S.f), I[1:k], I[k+1:2k])
-    neighbor.f = f(neighbor)
-
-
-    i = 1
-
-    while !is_better(neighbor, S) && max_tries < 10
-        I = randperm(length(S.w))
-
-        neighbor = swap(Permutation(copy(S.w), S.f), I[1:k], I[k+1:2k])
-        neighbor.f = f(neighbor)
-        i += 1
-    end
+    # i = 1
+    # while !is_better(neighbor, S) && max_tries < 10
+    #     d = 0
+    #     while d < distance && j ∉ tabuList
+            
+    #     end
+    #     i += 1
+    # end
     
 
     return neighbor
