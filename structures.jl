@@ -5,9 +5,9 @@ end
 
 mutable struct Bin
     x::Array{Int}   # items
-    w::Array{Real}  # whight
+    w::Array{Real}  # weight
     C::Real         # capacity
-    f::Real        # obj. func. value
+    rC::Real        # remaining capacity
 end
 
 struct BinPacking

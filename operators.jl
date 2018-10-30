@@ -7,8 +7,8 @@ end
 
 function is_better(B1::Array{Bin}, B2::Array{Bin})
     # B1 is better than B2
-    f1 = sum( [ b.f^2 for b in B1 ] )
-    f2 = sum( [ b.f^2 for b in B2 ] )
+    f1 = sum( [ b.rC^2 for b in B1 ] )
+    f2 = sum( [ b.rC^2 for b in B2 ] )
     # println(f1)
     # println(f2)
     return f1 >= f2
@@ -73,47 +73,64 @@ end
 function swap(bin1::Bin, bin2::Bin; distance::Real=2)
     ii = jj = -1
 
-    for i = randperm(length(bin1.w))
-        w = bin1.w[i]
+    bin_tmp = bin1
 
-        if w + bin2.f <= bin2.C
-            ii = i
-            break
-        end
+    if length(bin2.w) == 1
+        bin1 = bin2
+        bin2 = bin_tmp
     end
     
-    wii = ii > 0 ? bin1.w[ii] : 0
+    swap01 = length(bin1.w) == 1
 
-    for j = randperm(length(bin2.w))
-        w = bin2.w[j]
+    II = randperm(length(bin1.w))
+    JJ = randperm(length(bin2.w))
 
-        if w + bin1.f - wii <= bin1.C
-            jj = j
-            break
+    for i ∈ II
+        w1 = bin1.w[i]
+        for j ∈ JJ
+            if i == j
+                continue                
+            end
+
+            w2 = swap01 ? 0 : bin2.w[j]
+            
+            w1 + bin2.rC <= bin2.C - w2 && (ii = i)
+            !swap01 && w2 + bin1.rC <= bin1.C - w1 && (jj = j)
         end
+
+        jj > 0 && ii > 0 && (break)
+        swap01 && ii > 0 && (break)
     end
 
     if ii > 0 && jj > 0
-        bin1.f += -bin1.w[ii] + bin2.w[jj]
-        bin2.f += bin1.w[ii] - bin2.w[jj]
+        bin1.rC += -bin1.w[ii] + bin2.w[jj]
+        bin2.rC += bin1.w[ii] - bin2.w[jj]
         
         w = bin1.w[ii]
+        x = bin1.x[ii]
         bin1.w[ii] = bin2.w[jj]
         bin2.w[jj] = w
+
+        bin1.x[ii] = bin2.x[jj]
+        bin2.x[jj] = x
         return 2
     elseif ii > 0
-        bin1.f -= bin1.w[ii]
-        bin2.f += bin1.w[ii]
+        bin1.rC -= bin1.w[ii]
+        bin2.rC += bin1.w[ii]
 
         push!(bin2.w, bin1.w[ii])
+        push!(bin2.x, bin1.x[ii])
         deleteat!(bin1.w, ii)
+        deleteat!(bin1.x, ii)
         return 1
     elseif jj > 0
-        bin1.f += bin2.w[jj]
-        bin2.f -= bin2.w[jj]
+        bin1.rC += bin2.w[jj]
+        bin2.rC -= bin2.w[jj]
 
         push!(bin1.w, bin2.w[jj])
+        push!(bin1.x, bin2.x[jj])
         deleteat!(bin2.w, jj)
+        deleteat!(bin2.x, jj)
         return 1
     end
 
@@ -127,10 +144,13 @@ function getNeighbor(Bins::Array{Bin}, f::Function; distance::Real=2)
     Ids = randperm(b)
     d = 0
 
-    for i = 1:b
-        bin1 = bins[Ids[i]]
-        for j = (i+1):b
-            bin2 = bins[Ids[j]]
+    for i = Ids
+        bin1 = bins[i]
+        for j = 1:b
+
+            (i == j) && (continue)
+
+            bin2 = bins[j]
 
 
             d  += swap(bin1, bin2)
@@ -149,7 +169,7 @@ function getNeighbor(Bins::Array{Bin}, f::Function; distance::Real=2)
 
     rms = Int[]
     for i = 1:b
-        if bins[i].f < 1
+        if bins[i].rC < 1 || length(bins[i].w) < 1
             push!(rms, i)
         end
     end

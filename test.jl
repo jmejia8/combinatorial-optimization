@@ -21,11 +21,11 @@ function test()
     for i = 1:size(W, 1)
         w = W[i,:]
 
-        fobj, initSol, getNeighbor, d, T = binpacking(C, w)
+        fobj, initSol, getNeighbor, d, T = binpackingGroups(C, w)
 
         result_hc = hillClimbing(fobj, initSol, getNeighbor; distance=2, max_iters=T)
         result_sa = simulatedAnnealing(fobj, initSol, getNeighbor; distance=2, max_iters=T)
-        println(i, "\t", result_hc.f, "\t", result_sa.f)
+        println(i, "\t", length(initSol()), "\t", length(result_hc), "\t", length(result_sa))
 
     end
 end
@@ -71,4 +71,22 @@ function test_greedy()
 
 end
 
+function simpleTest()
+    w = [4, 8, 1, 4, 2, 1]
+    C = 10
+    # sol: bin1 = {4, 4, 2} and bin2 = {8, 2}
+
+    fobj, initSol, getNeighbor, d, T = binpackingGroups(C, w)
+    result_hc = hillClimbing(fobj, initSol, getNeighbor; distance=2, max_iters=T)
+    result_sa = simulatedAnnealing(fobj, initSol, getNeighbor; distance=2, max_iters=T)
+    println(length(result_hc), "\t", length(result_sa))
+    println("--==================================== S0 ====================================--")
+    printbin(initSol())
+    println("--==================================== HC ====================================--")
+    printbin(result_hc)
+    println("--==================================== SA ====================================--")
+    printbin(result_sa)
+end
+
+# simpleTest()
 test()

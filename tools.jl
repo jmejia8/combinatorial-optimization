@@ -4,7 +4,7 @@ import Printf.@printf
 function printbin(b::Bin)
     println("x: ", b.x)
     println("w: ", b.w)
-    println("C = $(b.C) \t f = $(b.f)")
+    println("C = $(b.C) \t rC = $(b.rC)")
 end
 
 function printbin(bins::Array{Bin})
@@ -18,6 +18,6 @@ function printbin(bins::Array{Bin})
 end
 
 function summary_(bins::Array{Bin})
-    Cs = [ bin.f for bin ∈ bins]
+    Cs = [ bin.rC for bin ∈ bins]
     @printf("|B| = %d \t mean(w) = %.3f \t std(w) = %.3f\n", length(bins), mean(Cs), std(Cs))
 end
