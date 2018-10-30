@@ -88,7 +88,8 @@ function simulatedAnnealing(f::Function, initSolution::Function, getNeighbor::Fu
     S_old = initSolution()
     S_best = S_old
 
-    for t = 1:max_iters
+    t = 1
+    while T >= T_min
 
         for i = 1:max_attemps
             S_new = getNeighbor(S_old, f; distance = distance)
@@ -102,7 +103,8 @@ function simulatedAnnealing(f::Function, initSolution::Function, getNeighbor::Fu
             end
         end
      
-        T = g(T, t) < T_min ? T_min : g(T, t)
+        t += 1
+        T = g(T, t)
     end
 
     return S_best
