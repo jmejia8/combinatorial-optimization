@@ -10,6 +10,12 @@ mutable struct Bin
     rC::Real        # remaining capacity
 end
 
+mutable struct Tabu
+    bin1::Int
+    bin2::Int
+    freq::Int
+end
+
 struct BinPacking
     w::Array{Real}
     C::Real
