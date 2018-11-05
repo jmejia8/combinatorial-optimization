@@ -118,14 +118,22 @@ end
 function tabuSearch(f::Function, initSolution::Function, getNeighbor::Function; distance::Int = 2, max_iters::Int = 1000)
     S_old = initSolution()
 
-    tabuList = zeros(Int, length(S_old.w))
+    tabu_list = Tabu[]
 
-    for t = 1:max_iters
-        S_new = getNeighbor(S_old, fObj, tabuList; distance = distance)
+    stop = false
+    t = 0
+    while !stop 
+
+        S_new = getNeighbor(S_old, tabu_list, f; distance = distance)
 
         if is_better(S_new, S_old)
             S_old = S_new
         end
+
+        update_tabu_list!(tabu_list)
+
+        t += 1
+        stop = t >= max_iters
     end
 
     return S_old
