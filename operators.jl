@@ -1,4 +1,5 @@
 import Random.randperm
+import Base.∈
 
 function is_better(S1, S2)
     # S1 is better than S2
@@ -85,21 +86,33 @@ function swap(bin1::Bin, bin2::Bin; distance::Real=2)
     II = randperm(length(bin1.w))
     JJ = randperm(length(bin2.w))
 
+    swap_found = false
     for i ∈ II
         w1 = bin1.w[i]
-        for j ∈ JJ
-            if i == j
-                continue                
-            end
 
-            w2 = swap01 ? 0 : bin2.w[j]
-            
-            w1 + bin2.rC <= bin2.C - w2 && (ii = i)
-            !swap01 && w2 + bin1.rC <= bin1.C - w1 && (jj = j)
+        if w1 + bin2.rC <= bin2.C
+            ii = i
+            swap_found = true
+            break
         end
 
-        jj > 0 && ii > 0 && (break)
-        swap01 && ii > 0 && (break)
+        for j ∈ JJ
+            w2 = bin2.w[j]
+
+            if w2 + bin1.rC <= bin1.C
+                jj = j
+                swap_found = true
+                break
+            end
+
+            if w1 - w2 + bin2.rC <= bin2.C && w2 - w1 + bin1.rC <= bin1.C
+                ii, jj = i, j
+                swap_found = true
+                break
+            end
+        end
+
+        swap_found && (break)
     end
 
     if ii > 0 && jj > 0
@@ -132,6 +145,10 @@ function swap(bin1::Bin, bin2::Bin; distance::Real=2)
         deleteat!(bin2.w, jj)
         deleteat!(bin2.x, jj)
         return 1
+    end
+
+    if swap_found
+        return distance    
     end
 
     return 0
@@ -176,8 +193,89 @@ function getNeighbor(Bins::Array{Bin}, f::Function; distance::Real=2)
 
     deleteat!(bins, rms)
     return bins
+end
 
 
+function ∈(bins::Tuple{Int64,Int64}, tabu_list::Array{Tabu})
+    is_tabu(x) = x.bin1 ∈ bins && x.bin2 ∈ bins
+    i = findfirst(is_tabu, tabu_list)
+    
+    if i == nothing
+        return false
+    end
+
+    return true
+end
+
+function update_tabu_list!(tabu_list::Array{Tabu}, bins::Tuple{Int64,Int64}, freq::Int = 3)
+    push!(tabu_list, Tabu( bins[1], bins[2], freq))
+end
+
+function update_tabu_list!(tabu_list::Array{Tabu}, bin::Int64)
+    is_tabu(x) = x.bin1 == bin || x.bin2 == bin
+    items = findall(is_tabu, tabu_list)
+    deleteat!(tabu_list, items)
+end
+
+
+function update_tabu_list!(tabu_list::Array{Tabu})
+    rms = Int[]
+    for i = 1:length(tabu_list)
+        tabu_list[i].freq -= 1
+        if tabu_list[i].freq < 1
+            push!(rms, i)
+        end
+    end
+
+    deleteat!(tabu_list, rms)
+end
+
+function getNeighbor(Bins::Array{Bin}, tabu_list::Array{Tabu}, f::Function; distance::Real=2, freq::Int = 3)
+    bins = deepcopy(Bins)
+    b = length(bins)
+    Ids = randperm(b)
+    d = 0
+
+    for i = Ids
+        bin1 = bins[i]
+        for j = 1:b
+
+            if i == j || (i, j) ∈ tabu_list
+                continue
+            end
+
+            bin2 = bins[j]
+
+            s  = swap(bin1, bin2)
+            
+            if s > 0
+                update_tabu_list!(tabu_list, (i, j), freq)
+            end
+
+            d += s
+
+            if d >= distance
+                break
+            end
+
+        end
+
+        if d >= distance
+            break
+        end
+    end
+
+
+    rms = Int[]
+    for i = 1:b
+        if bins[i].rC < 1 || length(bins[i].w) < 1
+            update_tabu_list!(tabu_list, i)
+            push!(rms, i)
+        end
+    end
+
+    deleteat!(bins, rms)
+    return bins
 end
 
 
