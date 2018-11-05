@@ -17,7 +17,7 @@ function test()
         C = 100
     end
 
-    println("i\thc\tsa")
+    println("i\tCFD\thc\tsa")
     for i = 1:size(W, 1)
         w = W[i,:]
 
@@ -25,7 +25,8 @@ function test()
 
         result_hc = hillClimbing(fobj, initSol, getNeighbor; distance=2, max_iters=T)
         result_sa = simulatedAnnealing(fobj, initSol, getNeighbor; distance=2, max_iters=T)
-        println(i, "\t", length(initSol()), "\t", length(result_hc), "\t", length(result_sa))
+        result_tb = tabuSearch(fobj, initSol, getNeighbor; distance=2, max_iters=T)
+        println(i, "\t", length(initSol()), "\t", length(result_hc), "\t", length(result_sa), "\t", length(result_tb))
 
     end
 end
