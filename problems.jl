@@ -33,7 +33,7 @@ function binpackingGroups(C::Real, w::Vector)
         for b ∈ B
             s += b.rC .^ 2
         end
-        -s
+        -s/length(B)
     end
 
     S = currentFit( BinPacking(w, C) )
