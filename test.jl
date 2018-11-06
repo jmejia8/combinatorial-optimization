@@ -17,7 +17,7 @@ function test()
         C = 100
     end
 
-    println("i\tCFD\thc\tsa")
+    println("i\tCFD\tHC\tSA\tTB")
     for i = 1:size(W, 1)
         w = W[i,:]
 
