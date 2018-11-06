@@ -159,11 +159,12 @@ function getNeighbor(Bins::Array{Bin}, f::Function; distance::Real=2)
     bins = deepcopy(Bins)
     b = length(bins)
     Ids = randperm(b)
+    Ids2 = randperm(b)
     d = 0
 
     for i = Ids
         bin1 = bins[i]
-        for j = 1:b
+        for j = Ids2
 
             (i == j) && (continue)
 
@@ -234,11 +235,12 @@ function getNeighbor(Bins::Array{Bin}, tabu_list::Array{Tabu}, f::Function; dist
     bins = deepcopy(Bins)
     b = length(bins)
     Ids = randperm(b)
+    Ids2 = randperm(b)
     d = 0
 
     for i = Ids
         bin1 = bins[i]
-        for j = 1:b
+        for j = Ids2
 
             if i == j || (i, j) ∈ tabu_list
                 continue

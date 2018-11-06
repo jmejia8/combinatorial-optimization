@@ -124,7 +124,7 @@ function tabuSearch(f::Function, initSolution::Function, getNeighbor::Function; 
     t = 0
     while !stop 
 
-        S_new = getNeighbor(S_old, tabu_list, f; distance = distance)
+        S_new = getNeighbor(S_old, tabu_list, f; distance = distance, freq  = 5)
 
         if is_better(S_new, S_old)
             S_old = S_new
