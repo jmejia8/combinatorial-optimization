@@ -118,7 +118,7 @@ function geneticAlgorithm(f::Function, w, C; popSize::Int = 10, T::Int = 100)
 
         # println("Replacement")
         replacement!(population, offsprings)
-        println(parents[1].f)
+        println(length(parents[1].bins))
     end
 
     population
