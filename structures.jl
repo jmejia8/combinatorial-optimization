@@ -20,3 +20,8 @@ struct BinPacking
     w::Array{Real}
     C::Real
 end
+
+mutable struct Individual
+	bins::Array{Bin,1}
+	f::Real
+end
