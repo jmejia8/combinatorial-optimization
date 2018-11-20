@@ -3,6 +3,7 @@ import DelimitedFiles.readdlm
 include("problems.jl")
 include("optimizers.jl")
 include("tools.jl")
+include("genetic-algorithm.jl")
 
 
 
@@ -17,7 +18,7 @@ function test()
         C = 100
     end
 
-    println("i\tCFD\tHC\tSA\tTB")
+    println("i\tCFD\tHC\tSA\tTB\tGA")
     for i = 1:size(W, 1)
         w = W[i,:]
 
@@ -26,7 +27,9 @@ function test()
         result_hc = hillClimbing(fobj, initSol, getNeighbor; distance=2, max_iters=T)
         result_sa = simulatedAnnealing(fobj, initSol, getNeighbor; distance=2, max_iters=T)
         result_tb = tabuSearch(fobj, initSol, getNeighbor; distance=2, max_iters=T)
-        println(i, "\t", length(initSol()), "\t", length(result_hc), "\t", length(result_sa), "\t", length(result_tb))
+        result_ga = geneticAlgorithm(fobj, w, C; T = 100)
+
+        println(i, "\t", length(initSol()), "\t", length(result_hc), "\t", length(result_sa), "\t", length(result_tb), "\t", length(result_ga))
 
     end
 end
