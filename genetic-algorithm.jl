@@ -1,4 +1,6 @@
-import Random: shuffle
+import Random: shuffle, randperm
+import DelimitedFiles.readdlm
+
 include("structures.jl")
 include("optimizers.jl")
 include("problems.jl")
@@ -7,17 +9,72 @@ function popGenerator(popSize, f, w, C)
     population = Individual[]
 
     for i = 1:popSize
-       b = currentFit(BinPacking( shuffle(w) , C))
-       fb = f(b)
+        r = randperm(length(w))
+        b = currentFit(BinPacking( w[r] , C), r)
+        fb = f(b)
 
-       push!(population, Individual(b, fb))
+        push!(population, Individual(b, fb))
     end
 
     population
 end
 
-function indivCorrector(offsprings)
+
+function firstFit!(bins::Array{Bin}, x::Int, w::Real)
+    # order_bins = :firstBin
+
+    saved = false
+    for bin ∈ bins
+        if bin.rC + w < bin.C
+            push!(bin.w, w)
+            push!(bin.x, x)
+            bin.rC += w
+            saved = true
+            break
+        end
+
+    end
+
+    if !saved
+        push!(bins, Bin(Int[x], Real[w], bins[1].C, w))
+        println("pasa")
+    end
     
+    return bins
+
+end
+
+function indivCorrector!(offspring, w)
+    bin_ids = Int[]
+
+    for bin ∈ offspring.bins
+        rms = Int[]
+        
+        j = 1
+        for i = bin.x
+            if i ∉ bin_ids
+                push!(bin_ids, i)
+            else
+                push!(rms, j)
+            end
+            j += 1
+        end
+
+        if length(rms) > 0
+            deleteat!(bin.x, rms)
+            deleteat!(bin.w, rms)
+        end
+    end
+
+
+
+    for i ∈ 1:length(w)
+        i ∈ bin_ids && continue
+
+        firstFit!(offspring.bins, i, w[i])
+
+    end
+
 end
 
 function selection(population; k = 2)
@@ -47,7 +104,7 @@ function selection(population; k = 2)
     return population[I]
 end
 
-function crossover(parents;p = 0.5)
+function crossover(parents, w, C;p = 0.5)
     offsprings = Individual[]
 
 
@@ -61,6 +118,7 @@ function crossover(parents;p = 0.5)
         offspring1 = deepcopy(parent1)
         offspring2 = deepcopy(parent1)
 
+        # recombination
         for j = 1:min(length(parent1.bins), length(parent2.bins))
             if rand() < p
                 offspring1.bins[j] = parent2.bins[j]
@@ -69,6 +127,9 @@ function crossover(parents;p = 0.5)
             end
 
         end
+
+        indivCorrector!(offspring1, w)
+        indivCorrector!(offspring2, w)
        
         push!(offsprings, offspring1)
         push!(offsprings, offspring2)
@@ -81,6 +142,7 @@ end
 
 function mutation!(offsprings,f; p = 0.1)
     for offspring in offsprings
+        offspring.f = f(offspring.bins)
         rand() > p && (continue)
 
         b = hillClimbing(f, ()-> offspring.bins, getNeighbor; max_iters=10)
@@ -100,43 +162,69 @@ function replacement!(population, offsprings)
 
     sort!(population, lt = (b1, b2) -> b1.f < b2.f)
 
-    population = population[1:N]
+    deleteat!(population, N+1:length(population))
+
 end
 
 
-function geneticAlgorithm(f::Function, w, C; popSize::Int = 10, T::Int = 100)
+function geneticAlgorithm(f::Function, w, C; popSize::Int = 10, T::Int = 20)
     population = popGenerator(popSize, f, w, C)
 
     for t = 1:T
         # println("Selection")
         parents    = selection(population)
+        # println(">>> ", length(parents[1].bins))
         # println("Crossover")
-        offsprings = crossover(parents)
+        offsprings = crossover(parents, w, C)
 
         # println("Mutation")
         mutation!(offsprings, f)
 
         # println("Replacement")
         replacement!(population, offsprings)
-        println(length(parents[1].bins))
+        # println(parents[1])
     end
 
-    population
+    population[1].bins
     
 end
 
 
-function test()
+function simple_test()
     popSize = 10
 
     w = [4, 8, 1, 4, 2, 1]
     C = 10
-    # sol: bin1 = {4, 4, 2} and bin2 = {8, 2}
+    # sol: bin1 = {4, 4, 2} and bin2 = {8, 1, 1}
 
     fobj, initSol, getNeighbor, d, T = binpackingGroups(C, w)
 
-    return geneticAlgorithm(fobj, w, C)
+    population = geneticAlgorithm(fobj, w, C)
 
+    population[1].bins
+end
+
+function test()
+    id = :u
+
+    if id == :u
+        W = readdlm("data/u120.csv", ',', '\n')
+        C = 150
+    else
+        W = readdlm("data/t120.csv", ',', '\n')
+        C = 100
+    end
+
+    println("i\tGA")
+    for i = 1:size(W, 1)
+        w = W[i,:]
+
+        fobj, initSol, getNeighbor, d, T = binpackingGroups(C, w)
+
+        result_ga = geneticAlgorithm(fobj, w, C)
+        println(i, "\t", length(initSol()), "\t", length(result_ga))
+
+    end
 end
 
 test()

@@ -49,11 +49,11 @@ function firstFit(problem::BinPacking; order_bins = :firstBin)
 end
 
 
-function currentFit(problem::BinPacking)
+function currentFit(problem::BinPacking, x = 1:length(problem.w))
     bins = Array{Bin}([])
 
     w = problem.w
-    x = 1:length(w)
+    # x = 1:length(w)
 
     i = 1
     for j = 1:length(problem.w)
