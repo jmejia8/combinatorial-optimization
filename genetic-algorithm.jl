@@ -37,7 +37,7 @@ function firstFit!(bins::Array{Bin}, x::Int, w::Real)
 
     if !saved
         push!(bins, Bin(Int[x], Real[w], bins[1].C, w))
-        println("pasa")
+        # println("pasa")
     end
     
     return bins
@@ -61,6 +61,7 @@ function indivCorrector!(offspring, w)
         end
 
         if length(rms) > 0
+            bin.rC -= sum(bin.w[rms])
             deleteat!(bin.x, rms)
             deleteat!(bin.w, rms)
         end
@@ -188,43 +189,3 @@ function geneticAlgorithm(f::Function, w, C; popSize::Int = 10, T::Int = 20)
     population[1].bins
     
 end
-
-
-function simple_test()
-    popSize = 10
-
-    w = [4, 8, 1, 4, 2, 1]
-    C = 10
-    # sol: bin1 = {4, 4, 2} and bin2 = {8, 1, 1}
-
-    fobj, initSol, getNeighbor, d, T = binpackingGroups(C, w)
-
-    population = geneticAlgorithm(fobj, w, C)
-
-    population[1].bins
-end
-
-function test()
-    id = :u
-
-    if id == :u
-        W = readdlm("data/u120.csv", ',', '\n')
-        C = 150
-    else
-        W = readdlm("data/t120.csv", ',', '\n')
-        C = 100
-    end
-
-    println("i\tGA")
-    for i = 1:size(W, 1)
-        w = W[i,:]
-
-        fobj, initSol, getNeighbor, d, T = binpackingGroups(C, w)
-
-        result_ga = geneticAlgorithm(fobj, w, C)
-        println(i, "\t", length(initSol()), "\t", length(result_ga))
-
-    end
-end
-
-test()
