@@ -13,14 +13,13 @@ function hillClimbing(fObj::Function, initSolution::Function, getNeighbor::Funct
     return S_old
 end
 
-function firstFit(problem::BinPacking; order_bins = :firstBin)
+function firstFit(problem::BinPacking, x = 1:length(problem.w); order_bins = :firstBin)
     # order_bins = :firstBin
     # order_bins = :fullestBin
     # order_bins = :emptiestBin
     bins = Array{Bin}([Bin([], [], problem.C, 0)])
 
     w = problem.w
-    x = 1:length(w)
     C = problem.C
 
     for j = 1:length(problem.w)
