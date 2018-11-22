@@ -12,9 +12,11 @@ function test()
 
     if id == :u
         W = readdlm("data/u120.csv", ',', '\n')
+        optimum = readdlm("data/sol_u120.csv", ',', '\n')
         C = 150
     else
         W = readdlm("data/t120.csv", ',', '\n')
+        optimum = 40ones(Int, 120)
         C = 100
     end
 
@@ -24,13 +26,13 @@ function test()
 
         fobj, initSol, getNeighbor, d, T = binpackingGroups(C, w)
 
+        T = 10
         result_hc = hillClimbing(fobj, initSol, getNeighbor; distance=2, max_iters=T)
         result_sa = simulatedAnnealing(fobj, initSol, getNeighbor; distance=2, max_iters=T)
         result_tb = tabuSearch(fobj, initSol, getNeighbor; distance=2, max_iters=T)
-        result_ga = geneticAlgorithm(fobj, w, C; T = 100)
+        result_ga = geneticAlgorithm(fobj, w, C; T = 500)
 
-        println(i, "\t", length(initSol()), "\t", length(result_hc), "\t", length(result_sa), "\t", length(result_tb), "\t", length(result_ga))
-
+        println(i, "\t", length(initSol()) - optimum[i], "\t", length(result_hc) - optimum[i], "\t", length(result_sa) - optimum[i], "\t", length(result_tb) - optimum[i], "\t", length(result_ga) - optimum[i])
     end
 end
 
