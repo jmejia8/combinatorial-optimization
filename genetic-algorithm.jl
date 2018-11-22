@@ -1,4 +1,4 @@
-import Random: shuffle, randperm
+import Random: shuffle!, randperm
 import DelimitedFiles.readdlm
 
 include("structures.jl")
@@ -10,7 +10,7 @@ function popGenerator(popSize, f, w, C)
 
     for i = 1:popSize
         r = randperm(length(w))
-        b = currentFit(BinPacking( w[r] , C), r)
+        b = firstFit(BinPacking( w[r] , C), r)
         fb = f(b)
 
         push!(population, Individual(b, fb))
@@ -21,14 +21,13 @@ end
 
 
 function firstFit!(bins::Array{Bin}, x::Int, w::Real)
-    # order_bins = :firstBin
 
     saved = false
-    for bin ∈ bins
-        if bin.rC + w < bin.C
-            push!(bin.w, w)
-            push!(bin.x, x)
-            bin.rC += w
+    for i ∈ 1:length(bins)
+        if bins[i].rC + w < bins[i].C
+            push!(bins[i].w, w)
+            push!(bins[i].x, x)
+            bins[i].rC += w
             saved = true
             break
         end
@@ -37,7 +36,6 @@ function firstFit!(bins::Array{Bin}, x::Int, w::Real)
 
     if !saved
         push!(bins, Bin(Int[x], Real[w], bins[1].C, w))
-        # println("pasa")
     end
     
     return bins
@@ -69,20 +67,19 @@ function indivCorrector!(offspring, w)
 
 
 
-    for i ∈ 1:length(w)
-        i ∈ bin_ids && continue
+    for x ∈ 1:length(w)
+        x ∈ bin_ids && continue
 
-        firstFit!(offspring.bins, i, w[i])
+        firstFit!(offspring.bins, x, w[x])
 
     end
 
 end
 
 function selection(population; k = 2)
-    # return population
     Argmin(L) = begin
         i_best = 1
-        for i in 1:length(L)
+        for i in 2:length(L)
             if L[i].f < L[i_best].f
                 i_best = i
             end
@@ -110,14 +107,14 @@ function crossover(parents, w, C;p = 0.5)
 
 
     for i = 1:div(length(parents), 2)
-        parent1 = parents[2i-1]
-        parent2 = parents[2i]
+        parent1 = deepcopy(parents[2i-1])
+        parent2 = deepcopy(parents[2i])
 
         sort!(parent1.bins, lt = (b1, b2) -> sum(b1.w) > sum(b2.w) )
         sort!(parent2.bins, lt = (b1, b2) -> sum(b1.w) > sum(b2.w) )
 
-        offspring1 = deepcopy(parent1)
-        offspring2 = deepcopy(parent1)
+        offspring1 = parent1
+        offspring2 = parent1
 
         # recombination
         for j = 1:min(length(parent1.bins), length(parent2.bins))
@@ -141,15 +138,24 @@ function crossover(parents, w, C;p = 0.5)
 
 end
 
-function mutation!(offsprings,f; p = 0.1)
-    for offspring in offsprings
-        offspring.f = f(offspring.bins)
-        rand() > p && (continue)
+function mutation!(offsprings,f,w; p = 0.1)
+    for i in 1:length(offsprings)
+        if rand() < p 
+            k = length(offsprings[i].bins)
 
-        b = hillClimbing(f, ()-> offspring.bins, getNeighbor; max_iters=10)
+            r = 0.1 + 0.2rand()
+            ratio = round(Int, r * k) - 1
 
-        offspring.bins = b
+            deleted_bins = offsprings[i].bins[k-ratio:k]
+            shuffle!(deleted_bins)
 
+            deleteat!(offsprings[i].bins, k-ratio:k)
+
+            indivCorrector!(offsprings[i], w)
+
+        end
+        
+        offsprings[i].f = f(offsprings[i].bins)
 
     end
 end
@@ -174,18 +180,18 @@ function geneticAlgorithm(f::Function, w, C; popSize::Int = 10, T::Int = 20)
     for t = 1:T
         # println("Selection")
         parents    = selection(population)
-        # println(">>> ", length(parents[1].bins))
+
         # println("Crossover")
         offsprings = crossover(parents, w, C)
 
         # println("Mutation")
-        mutation!(offsprings, f)
+        mutation!(offsprings, f, w)
 
         # println("Replacement")
         replacement!(population, offsprings)
-        # println(parents[1])
     end
 
-    population[1].bins
+    sort!(population, lt = (a, b) -> length(a.bins) < length(b.bins) )
     
+    population[1].bins
 end
