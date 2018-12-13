@@ -10,7 +10,7 @@ function firstFit!(bins::Array{Bin}, x::Int, w::Real, C::Int)
     saved = false
     b = 0
     for i ∈ 1:length(bins)
-        if bins[i].rC + w < bins[i].C
+        if bins[i].rC + w <= bins[i].C
             push!(bins[i].w, w)
             push!(bins[i].x, x)
             bins[i].rC += w
@@ -55,6 +55,7 @@ function generateBins(popSize, f, w, C, τ, R)
         end
 
         fb = f(bins)
+        sort!(bins, lt = (a, b) -> a.rC > b.rC)
 
         push!(population, Individual(bins, fb))
     end
@@ -65,7 +66,7 @@ end
 
 function pheromoneUpdate!(ants, w, memory, τ, p)
     # fs = [ ant.f for ant in ants ]
-    R = Real[]
+    # R = Real[]
 
     for i = 1:length(τ)
         ip = rand(1:1 + floor(Int, p*length(ants)))
@@ -84,14 +85,12 @@ function pheromoneUpdate!(ants, w, memory, τ, p)
         bin_w = pbest.bins[bin_id] 
 
         r = bin_w.rC / bin_w.C
-        push!(R, r)
         
-        τ[i] =  b_mode / b_emptiest ;
+        τ[i] =  r *(b_mode / b_emptiest)
     end
 
 
-    # R = sortperm(R, rev=true)
-    R = shuffle(1:length(w))
+    R = sortperm(τ, rev=true)
 
     return R
 
@@ -109,15 +108,13 @@ function ACO(f::Function, w, C; popSize::Int = 20, T::Int = 20)
 
         sort!(ants, lt = (a, b) -> length(a.bins) < length(b.bins) )
             
-        if best == nothing || best.f <= ants[1].f
-            best = ants[1]
+        if best == nothing || length(best.bins) > length(ants[1].bins)
+            best = deepcopy(ants[1])
         end
 
         p = 1.0 - t / T
         R = pheromoneUpdate!(ants, w, memory, τ, p)
 
-        println("iter: $t \t nBins: ", length(best.bins))
-        println(R)
     end
 
     return best.bins
@@ -136,7 +133,6 @@ function simple_test()
     best = ACO(fobj, w, C)
     println(length(best))
 
-    best
 end
 
 simple_test()
