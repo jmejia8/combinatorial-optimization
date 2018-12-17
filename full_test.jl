@@ -1,30 +1,33 @@
 import DelimitedFiles.readdlm
 
+include("solutions.jl")
 include("problems.jl")
 include("optimizers.jl")
 include("tools.jl")
 include("genetic-algorithm.jl")
+include("tabu.jl")
 include("aco.jl")
 
 
 
-function test()
-    id = :u
+function test(id = :u, D = 500)
+    
 
     if id == :u
-        W = readdlm("data/u120.csv", ',', '\n')
-        optimum = readdlm("data/sol_u120.csv", ',', '\n')
+        fname = "u$D"
+        W = readdlm("data/$(fname).csv", ',', '\n')
         C = 150
     else
-        W = readdlm("data/t120.csv", ',', '\n')
-        optimum = 40ones(Int, 120)
+        fname = "t$D"
+        W = readdlm("data/$(fname).csv", ',', '\n')
         C = 100
     end
+    
+    optimum = SOLUTIONS[fname]
 
     algorithms = [hillClimbing,simulatedAnnealing,tabuSearch,geneticAlgorithm, ACO]
     algorithms_names = ["hill-climbing","simulated-annealing","tabu-search","genetic-algorithm",]
 
-    println("i\tCFD\tHC\tSA\tTB\tGA")
     for i = 1:size(W, 1)
         w = W[i,:]
 
@@ -49,4 +52,3 @@ function test()
 end
 
 
-test()
