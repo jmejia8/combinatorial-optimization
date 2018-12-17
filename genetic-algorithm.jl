@@ -24,7 +24,7 @@ function firstFit!(bins::Array{Bin}, x::Int, w::Real)
 
     saved = false
     for i ∈ 1:length(bins)
-        if bins[i].rC + w < bins[i].C
+        if bins[i].rC + w <= bins[i].C
             push!(bins[i].w, w)
             push!(bins[i].x, x)
             bins[i].rC += w
@@ -174,7 +174,7 @@ function replacement!(population, offsprings)
 end
 
 
-function geneticAlgorithm(f::Function, w, C; popSize::Int = 10, T::Int = 20)
+function geneticAlgorithm(f::Function, w, C; popSize::Int = 20, T::Int = 1000)
     population = popGenerator(popSize, f, w, C)
 
     for t = 1:T

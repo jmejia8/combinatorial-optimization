@@ -25,7 +25,7 @@ function firstFit(problem::BinPacking, x = 1:length(problem.w); order_bins = :fi
     for j = 1:length(problem.w)
         saved = false
         for bin ∈ bins
-            if bin.rC + w[j] < bin.C
+            if bin.rC + w[j] <= bin.C
                 push!(bin.w, w[j])
                 push!(bin.x, x[j])
                 bin.rC += w[j]

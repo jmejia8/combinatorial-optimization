@@ -7,21 +7,22 @@ include("problems.jl")
 
 function firstFit!(bins::Array{Bin}, x::Int, w::Real, C::Int)
 
-    saved = false
     b = 0
     for i ∈ 1:length(bins)
-        if bins[i].rC + w <= bins[i].C
-            push!(bins[i].w, w)
-            push!(bins[i].x, x)
-            bins[i].rC += w
-            saved = true
+        if bins[i].rC + w == bins[i].C
             b = i
             break
+        elseif bins[i].rC + w < bins[i].C
+            b = i
         end
 
     end
 
-    if !saved
+    if b > 0
+        push!(bins[b].w, w)
+        push!(bins[b].x, x)
+        bins[b].rC += w
+    else
         push!(bins, Bin(Int[x], Real[w], C, w))
         b = length(bins)
     end
@@ -97,7 +98,7 @@ function pheromoneUpdate!(ants, w, memory, τ, p)
 end
 
 
-function ACO(f::Function, w, C; popSize::Int = 20, T::Int = 20)
+function ACO(f::Function, w, C; popSize::Int = 20, T::Int = 1000)
     τ = 0.5ones(length(w))
     R = shuffle(1:length(w))
     best = nothing
@@ -135,4 +136,4 @@ function simple_test()
 
 end
 
-simple_test()
+# simple_test()
